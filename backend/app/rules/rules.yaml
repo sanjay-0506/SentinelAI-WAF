@@ -1,0 +1,266 @@
+version: "1.0.0"
+released_at: "2026-06-27"
+rules:
+  # ─────────────────────────────────────────
+  # SQLI  (priority 1–10)
+  # ─────────────────────────────────────────
+  - id: SQLI_001
+    version: 1
+    name: "SQL Injection - UNION SELECT"
+    severity: CRITICAL
+    priority: 1
+    category: SQLI
+    pattern: "(?i)union\\s+(?:all\\s+)?select"
+    description: "UNION-based SQL injection used to extract data from other tables."
+
+  - id: SQLI_002
+    version: 1
+    name: "SQL Injection - Boolean Blind"
+    severity: HIGH
+    priority: 2
+    category: SQLI
+    pattern: "(?i)\\b(?:and|or)\\s+(?:\\d+\\s*[=<>]\\s*\\d+|'[^']*'\\s*=\\s*'[^']*')"
+    description: "Boolean-based blind SQL injection probing true/false conditions."
+
+  - id: SQLI_003
+    version: 1
+    name: "SQL Injection - Error Based extractvalue"
+    severity: HIGH
+    priority: 3
+    category: SQLI
+    pattern: "(?i)extractvalue\\s*\\("
+    description: "Error-based SQL injection using extractvalue() to leak data via error messages."
+
+  - id: SQLI_004
+    version: 1
+    name: "SQL Injection - Error Based updatexml"
+    severity: HIGH
+    priority: 4
+    category: SQLI
+    pattern: "(?i)updatexml\\s*\\("
+    description: "Error-based SQL injection using updatexml() to leak data via error messages."
+
+  - id: SQLI_005
+    version: 1
+    name: "SQL Injection - Stacked Queries"
+    severity: CRITICAL
+    priority: 5
+    category: SQLI
+    pattern: "(?i);\\s*(?:insert|update|delete|drop|create|alter|exec|execute|select)\\b"
+    description: "Stacked query injection allowing multiple SQL statements in a single request."
+
+  - id: SQLI_006
+    version: 1
+    name: "SQL Injection - Comment Sequences"
+    severity: MEDIUM
+    priority: 6
+    category: SQLI
+    pattern: "(?:--\\s|/\\*.*?\\*/|;\\s*--)"
+    description: "SQL comment sequences used to terminate or comment out query fragments."
+
+  - id: SQLI_007
+    version: 1
+    name: "SQL Injection - Time Based SLEEP"
+    severity: HIGH
+    priority: 7
+    category: SQLI
+    pattern: "(?i)\\b(?:sleep|benchmark|waitfor\\s+delay|pg_sleep)\\s*\\("
+    description: "Time-based blind SQL injection using sleep/benchmark functions."
+
+  - id: SQLI_008
+    version: 1
+    name: "SQL Injection - Information Schema"
+    severity: HIGH
+    priority: 8
+    category: SQLI
+    pattern: "(?i)information_schema\\s*\\."
+    description: "Attacker querying information_schema to enumerate database structure."
+
+  - id: SQLI_009
+    version: 1
+    name: "SQL Injection - INTO OUTFILE / DUMPFILE"
+    severity: CRITICAL
+    priority: 9
+    category: SQLI
+    pattern: "(?i)into\\s+(?:outfile|dumpfile)\\s+'"
+    description: "SQL injection writing query results to server filesystem."
+
+  # ─────────────────────────────────────────
+  # XSS  (priority 11–20)
+  # ─────────────────────────────────────────
+  - id: XSS_001
+    version: 1
+    name: "XSS - Script Tag"
+    severity: CRITICAL
+    priority: 11
+    category: XSS
+    pattern: "(?i)<\\s*script[^>]*>"
+    description: "Reflected or stored XSS via <script> tag injection."
+
+  - id: XSS_002
+    version: 1
+    name: "XSS - javascript: URI"
+    severity: HIGH
+    priority: 12
+    category: XSS
+    pattern: "(?i)javascript\\s*:"
+    description: "XSS via javascript: URI scheme in href or src attributes."
+
+  - id: XSS_003
+    version: 1
+    name: "XSS - onerror / onload Event Handler"
+    severity: HIGH
+    priority: 13
+    category: XSS
+    pattern: "(?i)\\bon(?:error|load|click|mouseover|focus|blur|input|change|submit|keydown|keyup)\\s*="
+    description: "XSS via inline HTML event handler injection."
+
+  - id: XSS_004
+    version: 1
+    name: "XSS - SVG Vector"
+    severity: HIGH
+    priority: 14
+    category: XSS
+    pattern: "(?i)<\\s*svg[^>]*(?:on\\w+\\s*=|>\\s*<\\s*script)"
+    description: "XSS using SVG elements with event handlers or embedded scripts."
+
+  - id: XSS_005
+    version: 1
+    name: "XSS - Encoded Angle Brackets"
+    severity: MEDIUM
+    priority: 15
+    category: XSS
+    pattern: "(?i)(?:%3c|&lt;|&#60;)\\s*script"
+    description: "XSS using URL/HTML-encoded angle brackets to bypass filters."
+
+  - id: XSS_006
+    version: 1
+    name: "XSS - img src Injection"
+    severity: MEDIUM
+    priority: 16
+    category: XSS
+    pattern: "(?i)<\\s*img[^>]+(?:onerror|onload)\\s*="
+    description: "XSS via img tag onerror/onload attribute injection."
+
+  - id: XSS_007
+    version: 1
+    name: "XSS - Expression / vbscript"
+    severity: HIGH
+    priority: 17
+    category: XSS
+    pattern: "(?i)(?:expression\\s*\\(|vbscript\\s*:)"
+    description: "XSS via CSS expression() or vbscript: URI (IE-specific vectors)."
+
+  # ─────────────────────────────────────────
+  # PATH_TRAVERSAL  (priority 21–30)
+  # ─────────────────────────────────────────
+  - id: PT_001
+    version: 1
+    name: "Path Traversal - Forward Slash Sequence"
+    severity: HIGH
+    priority: 21
+    category: PATH_TRAVERSAL
+    pattern: "(?:\\.\\./){2,}|(?:\\.\\./.*){2,}"
+    description: "Directory traversal using repeated ../ sequences."
+
+  - id: PT_002
+    version: 1
+    name: "Path Traversal - Backslash Sequence"
+    severity: HIGH
+    priority: 22
+    category: PATH_TRAVERSAL
+    pattern: "(?:\\.\\.\\\\/){1,}|\\.\\.\\\\"
+    description: "Directory traversal using Windows-style ..\\ sequences."
+
+  - id: PT_003
+    version: 1
+    name: "Path Traversal - URL Encoded"
+    severity: HIGH
+    priority: 23
+    category: PATH_TRAVERSAL
+    pattern: "(?i)(?:%2e%2e%2f|%2e%2e/|\\.%2e/|%2e\\./|%2e%2e%5c)"
+    description: "URL-encoded directory traversal sequences."
+
+  - id: PT_004
+    version: 1
+    name: "Path Traversal - Null Byte"
+    severity: HIGH
+    priority: 24
+    category: PATH_TRAVERSAL
+    pattern: "(?:%00|\x00)"
+    description: "Null byte injection used to truncate file paths."
+
+  - id: PT_005
+    version: 1
+    name: "Path Traversal - Sensitive File Access"
+    severity: CRITICAL
+    priority: 25
+    category: PATH_TRAVERSAL
+    pattern: "(?i)(?:/etc/(?:passwd|shadow|hosts|crontab|group)|/proc/self/environ|/windows/win\\.ini|/boot\\.ini)"
+    description: "Attempt to access sensitive system files via path traversal."
+
+  - id: PT_006
+    version: 1
+    name: "Path Traversal - Double Encoded"
+    severity: HIGH
+    priority: 26
+    category: PATH_TRAVERSAL
+    pattern: "(?i)(?:%252e%252e|%252f|%255c)"
+    description: "Double URL-encoded traversal sequences to bypass filters."
+
+  # ─────────────────────────────────────────
+  # COMMAND_INJECTION  (priority 31–40)
+  # ─────────────────────────────────────────
+  - id: CMDI_001
+    version: 1
+    name: "Command Injection - Semicolon with System Commands"
+    severity: CRITICAL
+    priority: 31
+    category: COMMAND_INJECTION
+    pattern: "(?i);\\s*(?:cat|ls|id|whoami|uname|pwd|echo|wget|curl|nc|bash|sh|python|perl|ruby)\\b"
+    description: "Command injection via semicolon separating OS commands."
+
+  - id: CMDI_002
+    version: 1
+    name: "Command Injection - Pipe Operator"
+    severity: CRITICAL
+    priority: 32
+    category: COMMAND_INJECTION
+    pattern: "(?i)\\|\\s*(?:cat|ls|id|whoami|uname|pwd|echo|wget|curl|nc|bash|sh|python|perl)\\b"
+    description: "Command injection via pipe (|) operator to chain OS commands."
+
+  - id: CMDI_003
+    version: 1
+    name: "Command Injection - Backtick Execution"
+    severity: CRITICAL
+    priority: 33
+    category: COMMAND_INJECTION
+    pattern: "`[^`]+`"
+    description: "Command injection via backtick subshell execution."
+
+  - id: CMDI_004
+    version: 1
+    name: "Command Injection - Dollar Paren Subshell"
+    severity: CRITICAL
+    priority: 34
+    category: COMMAND_INJECTION
+    pattern: "\\$\\([^)]+\\)"
+    description: "Command injection via $(cmd) subshell substitution."
+
+  - id: CMDI_005
+    version: 1
+    name: "Command Injection - Logical AND"
+    severity: HIGH
+    priority: 35
+    category: COMMAND_INJECTION
+    pattern: "(?i)&&\\s*(?:cat|ls|id|whoami|uname|pwd|echo|wget|curl|nc|bash|sh|python|perl)\\b"
+    description: "Command injection via && chaining OS commands."
+
+  - id: CMDI_006
+    version: 1
+    name: "Command Injection - Newline Bypass"
+    severity: HIGH
+    priority: 36
+    category: COMMAND_INJECTION
+    pattern: "(?:%0a|%0d|\\n|\\r)\\s*(?:cat|ls|id|whoami|uname|bash|sh|wget|curl)\\b"
+    description: "Command injection using newline characters to inject OS commands."

@@ -1,0 +1,24 @@
+[run]
+omit =
+    app/models/*
+    app/schemas/*
+    app/services/interfaces.py
+    app/services/replay_service.py
+    app/utils/helpers.py
+    app/repositories/*
+    app/api/v1/proxy.py
+    app/api/v1/inspect.py
+    app/api/v1/stats.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
