@@ -360,26 +360,45 @@ updated_at
 
 ---
 
-## Testing
+## Testing and Validation
 
-### Unit Tests (Backend)
+Testing and validation are executed locally on development machines. Continuous Integration (CI) systems like GitHub Actions, Jenkins, or GitLab CI are deliberately excluded to minimize maintenance overhead and keep the project's focus squarely on security and ML engineering.
 
-```bash
-cd backend
-pytest tests/unit/ -v --cov=app --cov-report=term-missing
-```
+### Local Unit & Integration Tests
 
-### Integration Tests
+All backend unit and integration tests are executed via `pytest` inside the backend container to ensure direct access to containerized dependencies (Redis, PostgreSQL).
 
 ```bash
-# Ensure the full stack is running
-docker compose up -d
-
-cd backend
-pytest tests/integration/ -v --timeout=60
+# Run pytest with term-missing coverage report inside the backend container
+docker compose exec backend pytest tests/ --cov=app --cov-report=term-missing
 ```
 
-### Attack Simulation (End-to-End)
+### Manual Release Verification
+
+To run a full manual verification suite of the application before release:
+
+```bash
+# Run the automated release check script
+python scripts/release_check.py
+```
+
+This script automates:
+1. **Connectivity Checks**: Validating that WAF API, Juice Shop, DVWA, and Dashboard are reachable and return healthy HTTP statuses.
+2. **Backend Tests & Coverage**: Running the Pytest test suite inside the container and validating that code coverage meets or exceeds **80%**.
+3. **Traffic Simulation**: Blasting benign and malicious traffic to verify that rules match and attacks are blocked properly.
+
+### Traffic Simulator
+
+To simulate a mix of randomized benign and malicious traffic:
+
+```bash
+# Run the traffic simulator locally
+python scripts/traffic_simulator.py
+```
+
+### Manual Attack Simulation (End-to-End)
+
+You can manually inspect WAF responses using `curl`:
 
 ```bash
 # SQL Injection
@@ -405,10 +424,9 @@ curl "http://localhost/api/v1/inspect" \
 
 ### Load Testing
 
-```bash
-# Install k6
-# https://k6.io/docs/get-started/installation/
+Smoke and stress load testing are executed locally using `k6`:
 
+```bash
 k6 run tests/load/smoke.js
 k6 run tests/load/stress.js --vus 100 --duration 60s
 ```
@@ -486,6 +504,34 @@ ai-waf/
 └── logs/                   # Shared log volume (nginx + backend)
     └── .gitkeep
 ```
+
+## Project Roadmap
+
+### Level 1: Core Proxy & Rules
+* **FastAPI**: Core async proxy gateway and WAF API.
+* **NGINX**: Reverse proxy acting as the single ingress point.
+* **PostgreSQL**: Hardened backend database for raw/processed logs.
+* **Redis**: Stats cache and atomic metrics store.
+* **Docker Compose**: Primary local and development deployment orchestrator.
+* **OWASP Juice Shop & DVWA**: Isolated target web applications for testing.
+* **Dashboard**: Next.js 14-based real-time security dashboard.
+* **Traffic Simulator**: Multi-threaded attack and benign traffic simulation tool.
+
+### Level 2: Deep Learning Detection
+* **SecBERT**: Transformer model fine-tuned on payload corpus for semantic classification.
+* **ONNX Runtime**: High-performance model inference integration.
+* **MLflow**: ML lifecycle management and model registry.
+* **Dataset Pipeline**: Automated pipeline for preparing training datasets from replays.
+* **Explainability Layer**: Integrated feature importance and explanation visualization.
+
+### Level 3: Advanced Ensemble & Behavioral Analysis
+* **Autoencoder**: Anomaly detection engine for zero-day attack identification.
+* **Session Engine**: Session-level behavioral modeling.
+* **Meta Learner**: XGBoost ensemble classifier to combine rule engine, SecBERT, and anomaly scores.
+* **Redis Streams**: High-throughput message bus for logs and stream processing.
+* **Drift Detection**: Automatic alerts for model feature/concept drift.
+* **Feedback Loop**: Active learning workflow for continuous model retraining.
+* **Kubernetes**: Scalable, containerized production orchestration.
 
 ---
 
